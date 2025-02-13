@@ -1,18 +1,18 @@
 ---
 chatmail:
   domain: "{{ inventory_hostname }}"
-  certificates_dir: /etc/ssl/private
+  certificates_dir: /etc/lego/certificates
   mailboxes_dir: /var/mail
-  max_user_send_per_minute: 30
-  max_mailbox_size: 100M
-  max_message_size: 25M
-  delete_mails_after: 30
-  delete_inactive_users_after: 30
-  username_min_length: 8
-  username_max_length: 30
-  password_min_length: 8
+  max_user_send_per_minute: 60
+  max_mailbox_size: "100M"
+  max_message_size: 31457280
+  delete_mails_after: 20
+  delete_inactive_users_after: 90
+  username_min_length: 9
+  username_max_length: 9
+  password_min_length: 9
   passthrough_senders: ""
-  passthrough_recipients: ""
+  passthrough_recipients: "xstore@testrun.org"
   filtermail_smtp_port: 10025
   postfix_reinject_port: 10026
   disable_ipv6: false
