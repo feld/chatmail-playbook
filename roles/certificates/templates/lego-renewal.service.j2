@@ -1,0 +1,10 @@
+[Unit]
+Description=LetsEncrypt certificate renewal
+
+[Service]
+Type=oneshot
+Environment="{{ lego.dns.env_name }}={{ lego.dns.env_value }}"
+ExecStart=/usr/bin/lego -a -d {{ chatmail.domain }} -d www.{{ chatmail.domain }} -d mta-sts.{{ chatmail.domain }} -m {{ lego.email }} --path {{ lego.path }} --dns {{ lego.dns.provider }} renew
+
+[Install]
+WantedBy=multi-user.target 

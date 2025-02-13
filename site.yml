@@ -1,0 +1,17 @@
+---
+- name: Deploy Chatmail Server
+  hosts: chatmail_servers
+  become: true
+  
+  roles:
+    - common
+    - unbound
+    - journald
+    - mtail
+    - certificates
+    - opendkim
+    - dovecot
+    - postfix
+    - nginx
+    - chatmaild
+    - zone 

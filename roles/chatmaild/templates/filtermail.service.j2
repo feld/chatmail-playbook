@@ -1,0 +1,11 @@
+[Unit]
+Description=Chatmail Postfix before queue filter
+
+[Service]
+ExecStart=/usr/local/lib/chatmaild/venv/bin/filtermail /usr/local/lib/chatmaild/chatmail.ini
+Restart=always
+RestartSec=30
+User=filtermail
+
+[Install]
+WantedBy=multi-user.target 

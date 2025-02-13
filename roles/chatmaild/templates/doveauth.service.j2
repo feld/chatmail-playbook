@@ -1,0 +1,12 @@
+[Unit]
+Description=Chatmail dict authentication proxy for dovecot
+
+[Service]
+ExecStart=/usr/local/lib/chatmaild/venv/bin/doveauth /run/doveauth/doveauth.socket /usr/local/lib/chatmaild/chatmail.ini
+Restart=always
+RestartSec=30
+User=vmail
+RuntimeDirectory=doveauth
+
+[Install]
+WantedBy=multi-user.target 

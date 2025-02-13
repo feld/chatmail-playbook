@@ -1,0 +1,34 @@
+---
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: restart doveauth
+  systemd:
+    name: doveauth.service
+    state: restarted
+    enabled: yes
+
+- name: restart chatmail-metadata
+  systemd:
+    name: chatmail-metadata.service
+    state: restarted
+    enabled: yes
+
+- name: restart echobot
+  systemd:
+    name: echobot.service
+    state: restarted
+    enabled: yes
+
+- name: restart filtermail
+  systemd:
+    name: filtermail.service
+    state: restarted
+    enabled: yes
+
+- name: restart lastlogin
+  systemd:
+    name: lastlogin.service
+    state: restarted
+    enabled: yes 

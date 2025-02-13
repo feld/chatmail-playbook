@@ -1,0 +1,39 @@
+# OpenDKIM configuration.
+
+Syslog			yes
+SyslogSuccess		yes
+
+# Common signing and verification parameters
+Canonicalization	relaxed/simple
+OversignHeaders		From
+
+On-BadSignature         reject
+On-KeyNotFound          reject
+On-NoSignature          reject
+
+Domain			{{ chatmail.domain }}
+Selector		{{ chatmail.dkim_selector|default('opendkim') }}
+KeyFile		  /etc/dkimkeys/{{ chatmail.dkim_selector|default('opendkim') }}.private
+KeyTable          /etc/dkimkeys/KeyTable
+SigningTable      refile:/etc/dkimkeys/SigningTable
+
+# Sign Autocrypt header in addition to the default
+SignHeaders *,+autocrypt,+content-type
+
+# Prevent addition of second Content-Type header and other important headers
+OversignHeaders from,reply-to,subject,date,to,cc,resent-date,resent-from,resent-sender,resent-to,resent-cc,in-reply-to,references,list-id,list-help,list-unsubscribe,list-subscribe,list-post,list-owner,list-archive,autocrypt
+
+# Script to ignore signatures that do not correspond to the From: domain.
+ScreenPolicyScript /etc/opendkim/screen.lua
+
+# Script to reject mails without a valid DKIM signature.
+FinalPolicyScript /etc/opendkim/final.lua
+
+UserID			opendkim
+UMask			007
+
+Socket			local:/var/spool/postfix/opendkim/opendkim.sock
+
+PidFile			/run/opendkim/opendkim.pid
+
+TrustAnchorFile		/usr/share/dns/root.key 

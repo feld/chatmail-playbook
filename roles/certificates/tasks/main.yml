@@ -1,0 +1,65 @@
+---
+- name: Ensure lego binary is present
+  copy:
+    src: lego
+    dest: /usr/bin/lego
+    mode: '0555'
+    owner: root
+    group: root
+
+- name: Create certificates directory
+  file:
+    path: "{{ chatmail.certificates_dir }}"
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Create lego renewal service
+  template:
+    src: lego-renewal.service.j2
+    dest: /etc/systemd/system/lego-renewal.service
+    mode: '0644'
+  notify: reload systemd
+
+- name: Create lego renewal timer
+  template:
+    src: lego-renewal.timer.j2
+    dest: /etc/systemd/system/lego-renewal.timer
+    mode: '0644'
+  notify: reload systemd
+
+- name: Issue initial certificate
+  command: >
+    /usr/bin/lego -a 
+    -d {{ chatmail.domain }} 
+    -d www.{{ chatmail.domain }} 
+    -d mta-sts.{{ chatmail.domain }} 
+    -m {{ lego.email }} 
+    --path {{ lego.path }} 
+    --dns {{ lego.dns.provider }} 
+    run
+  environment:
+    "{{ lego.dns.env_name }}": "{{ lego.dns.env_value }}"
+  args:
+    creates: "{{ chatmail.certificates_dir }}/{{ chatmail.domain }}.pem.key"
+
+- name: Set permissions on certificate key
+  file:
+    path: "{{ chatmail.certificates_dir }}/{{ chatmail.domain }}.key"
+    mode: '0440'
+    owner: root
+    group: root
+  when: chatmail.certificates_dir + '/' + chatmail.domain + '.key' is file
+
+- name: Create certificate symlinks
+  file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+  loop:
+    - src: "{{ chatmail.certificates_dir }}/{{ chatmail.domain }}.key"
+      dest: "{{ chatmail.certificates_dir }}/{{ chatmail.domain }}.pem.key"
+    - src: "{{ chatmail.certificates_dir }}/{{ chatmail.domain }}.crt"
+      dest: "{{ chatmail.certificates_dir }}/{{ chatmail.domain }}.pem"
+  when: chatmail.certificates_dir + '/' + chatmail.domain + '.key' is file 

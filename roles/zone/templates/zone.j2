@@ -1,0 +1,26 @@
+;
+; Please manually verify the values are correct for your deployment
+;
+; Required DNS entries for chatmail servers 
+;
+{{ chatmail.domain }}.                   A     {{ ansible_default_ipv4.address }}
+{{ chatmail.domain }}.                   AAAA  {{ ansible_default_ipv6.address }}
+{{ chatmail.domain }}.                   MX 10 {{ chatmail.domain }}.
+_mta-sts.{{ chatmail.domain }}.          TXT "v=STSv1; id={{ sts_id }}"
+mta-sts.{{ chatmail.domain }}.           CNAME {{ chatmail.domain }}.
+www.{{ chatmail.domain }}.               CNAME {{ chatmail.domain }}.
+opendkim._domainkey.{{ chatmail.domain }}. TXT {{ dkim_txt_value }}
+
+;
+; Recommended DNS entries for interoperability and security-hardening
+;
+{{ chatmail.domain }}.                   TXT "v=spf1 a:{{ chatmail.domain }} ~all"
+_dmarc.{{ chatmail.domain }}.            TXT "v=DMARC1;p=reject;adkim=s;aspf=s"
+
+{{ chatmail.domain }}.                   CAA 0 issue "letsencrypt.org;accounturi=https://acme-v02.api.letsencrypt.org/acme/acct/YOUR_ACCOUNT_ID_HERE"
+_adsp._domainkey.{{ chatmail.domain }}.  TXT "dkim=discardable"
+
+_submission._tcp.{{ chatmail.domain }}.  SRV 0 1 587 {{ chatmail.domain }}.
+_submissions._tcp.{{ chatmail.domain }}. SRV 0 1 465 {{ chatmail.domain }}.
+_imap._tcp.{{ chatmail.domain }}.        SRV 0 1 143 {{ chatmail.domain }}.
+_imaps._tcp.{{ chatmail.domain }}.       SRV 0 1 993 {{ chatmail.domain }}. 

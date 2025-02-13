@@ -1,0 +1,12 @@
+[Unit]
+Description=Dict proxy for last-login tracking
+
+[Service]
+ExecStart=/usr/local/lib/chatmaild/venv/bin/lastlogin /run/chatmail-lastlogin/lastlogin.socket /usr/local/lib/chatmaild/chatmail.ini
+Restart=always
+RestartSec=30
+User=vmail
+RuntimeDirectory=chatmail-lastlogin
+
+[Install]
+WantedBy=multi-user.target 

@@ -1,0 +1,1 @@
+{{ chatmail.dkim_selector|default('opendkim') }}._domainkey.{{ chatmail.domain }} {{ chatmail.domain }}:{{ chatmail.dkim_selector|default('opendkim') }}:/etc/dkimkeys/{{ chatmail.dkim_selector|default('opendkim') }}.private 

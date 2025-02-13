@@ -1,0 +1,16 @@
+---
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: restart lego-renewal
+  systemd:
+    name: lego-renewal.service
+    state: restarted
+    enabled: yes
+
+- name: start lego-renewal timer
+  systemd:
+    name: lego-renewal.timer
+    state: started
+    enabled: yes 

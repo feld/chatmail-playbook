@@ -1,0 +1,33 @@
+---
+- name: Install mtail package
+  apt:
+    name: mtail
+    state: present
+
+- name: Configure mtail delivered_mail metrics
+  copy:
+    src: delivered_mail.mtail
+    dest: /etc/mtail/delivered_mail.mtail
+    mode: '0644'
+    owner: root
+    group: root
+  notify: restart mtail
+
+- name: Create systemd override directory
+  file:
+    path: /etc/systemd/system/mtail.service.d
+    state: directory
+    mode: '0755'
+
+- name: Configure mtail service override
+  copy:
+    content: |
+      [Service]
+      ExecCondition=
+      ExecStart=
+      ExecStart=/bin/sh -c 'journalctl -f -o short-iso -n 0 | /usr/bin/mtail ${HOST:+--address $HOST} ${PORT:+--port $PORT} --progs /etc/mtail --logtostderr --logs -'
+    dest: /etc/systemd/system/mtail.service.d/override.conf
+    mode: '0644'
+  notify:
+    - reload systemd
+    - restart mtail 

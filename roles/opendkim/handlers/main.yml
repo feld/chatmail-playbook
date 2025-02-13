@@ -1,0 +1,11 @@
+---
+- name: restart opendkim
+  service:
+    name: opendkim
+    state: restarted
+    enabled: yes
+
+- name: restart postfix
+  service:
+    name: postfix
+    state: restarted 

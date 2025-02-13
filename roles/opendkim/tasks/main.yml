@@ -1,0 +1,88 @@
+---
+- name: Create dkimkeys directory
+  file:
+    path: /etc/dkimkeys
+    state: directory
+    owner: opendkim
+    group: opendkim
+    mode: '0700'
+
+- name: Create opendkim directory
+  file:
+    path: /etc/opendkim
+    state: directory
+    owner: opendkim
+    group: opendkim
+    mode: '0750'
+
+- name: Create postfix opendkim directory
+  file:
+    path: /var/spool/postfix/opendkim
+    state: directory
+    owner: opendkim
+    group: opendkim
+    mode: '0750'
+
+- name: Install OpenDKIM packages
+  apt:
+    name:
+      - opendkim
+      - opendkim-tools
+    state: present
+
+- name: Copy OpenDKIM Lua scripts
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/opendkim/{{ item }}"
+    mode: '0644'
+    owner: root
+    group: root
+  loop:
+    - screen.lua
+    - final.lua
+  notify: restart opendkim
+
+- name: Configure OpenDKIM
+  template:
+    src: opendkim.conf.j2
+    dest: /etc/opendkim.conf
+    mode: '0644'
+  notify: restart opendkim
+
+- name: Configure OpenDKIM KeyTable
+  template:
+    src: KeyTable.j2
+    dest: /etc/dkimkeys/KeyTable
+    mode: '0644'
+    owner: opendkim
+    group: opendkim
+  notify: restart opendkim
+
+- name: Configure OpenDKIM SigningTable
+  template:
+    src: SigningTable.j2
+    dest: /etc/dkimkeys/SigningTable
+    mode: '0644'
+    owner: opendkim
+    group: opendkim
+  notify: restart opendkim
+
+- name: Generate OpenDKIM domain keys
+  command: "opendkim-genkey -D /etc/dkimkeys -d {{ chatmail.domain }} -s {{ chatmail.dkim_selector|default('opendkim') }}"
+  args:
+    creates: "/etc/dkimkeys/{{ chatmail.dkim_selector|default('opendkim') }}.private"
+  notify: restart opendkim
+
+- name: Set OpenDKIM files ownership
+  file:
+    path: /etc/dkimkeys/
+    owner: opendkim
+    group: opendkim
+    recurse: yes
+
+- name: Add postfix user to opendkim group
+  user:
+    name: postfix
+    groups: opendkim
+    append: yes
+  notify: restart postfix 

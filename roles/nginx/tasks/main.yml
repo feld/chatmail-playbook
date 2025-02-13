@@ -1,0 +1,65 @@
+---
+- name: Install nginx and required packages
+  apt:
+    name:
+      - nginx
+      - libnginx-mod-stream
+      - fcgiwrap
+    state: present
+
+- name: Configure nginx
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    mode: '0644'
+  notify: restart nginx
+
+- name: Create CGI directory
+  file:
+    path: /usr/lib/cgi-bin
+    state: directory
+    mode: '0755'
+
+- name: Install newemail.py CGI script
+  copy:
+    src: newemail.py
+    dest: /usr/lib/cgi-bin/newemail.py
+    mode: '0755'
+
+- name: Create autoconfig directory
+  file:
+    path: /var/www/html/.well-known/autoconfig/mail
+    state: directory
+    mode: '0755'
+    recurse: yes
+
+- name: Configure autoconfig
+  template:
+    src: autoconfig.xml.j2
+    dest: /var/www/html/.well-known/autoconfig/mail/config-v1.1.xml
+    mode: '0644'
+
+- name: Configure MTA-STS
+  template:
+    src: mta-sts.txt.j2
+    dest: /var/www/html/.well-known/mta-sts.txt
+    mode: '0644'
+
+- name: Copy static web files
+  copy:
+    src: "{{ item }}"
+    dest: /var/www/html/
+    mode: '0644'
+  loop:
+    - collage-info.png
+    - collage-privacy.png
+    - collage-top.png
+    - logo.svg
+    - main.css
+
+- name: Generate QR code
+  command: >
+    qrencode -lH -o /var/www/html/qr-chatmail-invite-{{ chatmail.domain }}.png 
+    DCACCOUNT:https://{{ chatmail.domain }}/new
+  args:
+    creates: "/var/www/html/qr-chatmail-invite-{{ chatmail.domain }}.png" 

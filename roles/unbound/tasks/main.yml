@@ -1,0 +1,20 @@
+---
+- name: Install unbound packages
+  apt:
+    name:
+      - unbound
+      - unbound-anchor
+      - dnsutils
+    state: present
+
+- name: Initialize unbound root anchor
+  command: unbound-anchor -a /var/lib/unbound/root.key || true
+  args:
+    creates: /var/lib/unbound/root.key
+  notify: restart unbound
+
+- name: Enable and start unbound service
+  service:
+    name: unbound.service
+    state: started
+    enabled: yes 

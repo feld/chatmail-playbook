@@ -1,0 +1,10 @@
+---
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: restart mtail
+  service:
+    name: mtail.service
+    state: restarted
+    enabled: yes 

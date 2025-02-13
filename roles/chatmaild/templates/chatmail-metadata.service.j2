@@ -1,0 +1,12 @@
+[Unit]
+Description=Chatmail dict proxy for IMAP METADATA
+
+[Service]
+ExecStart=/usr/local/lib/chatmaild/venv/bin/chatmail-metadata /run/chatmail-metadata/metadata.socket /usr/local/lib/chatmaild/chatmail.ini
+Restart=always
+RestartSec=30
+User=vmail
+RuntimeDirectory=chatmail-metadata
+
+[Install]
+WantedBy=multi-user.target 

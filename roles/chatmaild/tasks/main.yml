@@ -1,0 +1,85 @@
+---
+- name: Install required packages
+  apt:
+    name:
+      - acl
+      - python3-virtualenv
+    state: present
+
+- name: Create chatmaild base directory
+  file:
+    path: /usr/local/lib/chatmaild
+    state: directory
+    mode: '0755'
+
+- name: Create virtualenv directory
+  file:
+    path: /usr/local/lib/chatmaild/venv
+    state: directory
+    mode: '0755'
+
+- name: Create dist directory
+  file:
+    path: /usr/local/lib/chatmaild/dist
+    state: directory
+    mode: '0755'
+
+- name: Copy chatmaild package
+  copy:
+    src: "chatmaild-{{ chatmaild.release }}.tar.gz"
+    dest: "/usr/local/lib/chatmaild/dist/chatmaild-{{ chatmaild.release }}.tar.gz"
+    mode: '0644'
+
+- name: Create virtualenv
+  command: /usr/bin/virtualenv /usr/local/lib/chatmaild/venv
+  args:
+    creates: /usr/local/lib/chatmaild/venv/bin/python
+
+- name: Install chatmaild package
+  pip:
+    name: "/usr/local/lib/chatmaild/dist/chatmaild-{{ chatmaild.release }}.tar.gz"
+    virtualenv: /usr/local/lib/chatmaild/venv
+  notify:
+    - restart doveauth
+    - restart chatmail-metadata
+    - restart echobot
+    - restart filtermail
+    - restart lastlogin
+
+- name: Configure chatmail.ini
+  template:
+    src: chatmail.ini.j2
+    dest: /usr/local/lib/chatmaild/chatmail.ini
+    mode: '0644'
+  notify:
+    - restart doveauth
+    - restart chatmail-metadata
+    - restart echobot
+    - restart filtermail
+    - restart lastlogin
+
+- name: Create echobot group
+  group:
+    name: echobot
+  notify: restart echobot
+
+- name: Create echobot user
+  user:
+    name: echobot
+    group: echobot
+    home: /home/echobot
+    shell: /bin/sh
+  notify: restart echobot
+
+- name: Create systemd service files
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/systemd/system/{{ item }}"
+    mode: '0644'
+  loop:
+    - doveauth.service
+    - chatmail-metadata.service
+    - echobot.service
+    - filtermail.service
+    - lastlogin.service
+  notify: reload systemd 

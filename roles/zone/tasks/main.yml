@@ -1,0 +1,33 @@
+---
+- name: Get DKIM public key
+  shell: >
+    openssl rsa -in /etc/dkimkeys/opendkim.private -pubout 2>/dev/null | 
+    awk '/-/{next}{printf("%s",$0)}'
+  register: dkim_pubkey
+  changed_when: false
+
+- name: Generate DKIM TXT record value
+  set_fact:
+    dkim_txt_value: >-
+      {% set raw = 'v=DKIM1;k=rsa;p=' + dkim_pubkey.stdout + ';s=email;t=s' %}
+      {% set chunks = raw|regex_findall('.{1,255}') %}
+      {{ chunks|map('regex_replace', '^(.*)$', '"\1"')|join(' ') }}
+
+- name: Get MTA-STS timestamp
+  stat:
+    path: /var/www/html/.well-known/mta-sts.txt
+  register: sts_file
+
+- name: Generate zone file
+  template:
+    src: zone.j2
+    dest: /tmp/chatmail.zone
+    mode: '0644'
+  vars:
+    sts_id: "{{ sts_file.stat.mtime|int }}"
+
+- name: Print zone file
+  debug:
+    msg: |
+      
+      {{ lookup('file', '/tmp/chatmail.zone') }} 

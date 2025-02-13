@@ -1,0 +1,51 @@
+---
+chatmail:
+  domain: "{{ inventory_hostname }}"
+  certificates_dir: /etc/ssl/private
+  mailboxes_dir: /var/mail
+  max_user_send_per_minute: 30
+  max_mailbox_size: 100M
+  max_message_size: 25M
+  delete_mails_after: 30
+  delete_inactive_users_after: 30
+  username_min_length: 8
+  username_max_length: 30
+  password_min_length: 8
+  passthrough_senders: ""
+  passthrough_recipients: ""
+  filtermail_smtp_port: 10025
+  postfix_reinject_port: 10026
+  disable_ipv6: false
+  mtail:
+    address: 127.0.0.1
+  imap_rawlog: false
+  debug: false
+
+  # Privacy policy settings
+  privacy_postal: |
+    Your Organization Name
+    Street Address
+    City, State ZIP
+    Country
+  privacy_mail: privacy@example.com
+  privacy_pdo: |
+    Data Protection Officer
+    Street Address
+    City, State ZIP
+    Country
+  privacy_supervisor: |
+    Supervisory Authority
+    Street Address
+    City, State ZIP
+    Country
+
+lego:
+  email: admin@example.com
+  path: /etc/lego
+  dns:
+    provider: dnsimple  # Change as needed
+    env_name: DNSIMPLE_OAUTH_TOKEN
+    env_value: your-token-here
+
+chatmaild:
+  release: 1.0.0  # Update as needed 
