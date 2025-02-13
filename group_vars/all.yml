@@ -2,7 +2,7 @@
 chatmail:
   domain: "{{ inventory_hostname }}"
   certificates_dir: /etc/lego/certificates
-  mailboxes_dir: /var/mail
+  mailboxes_dir: "/home/vmail/mail"
   max_user_send_per_minute: 60
   max_mailbox_size: "100M"
   max_message_size: 31457280
